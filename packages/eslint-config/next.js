@@ -6,52 +6,78 @@ import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginReact from "eslint-plugin-react";
 import globals from "globals";
 import pluginNext from "@next/eslint-plugin-next";
-import { config as baseConfig } from "./base.js";
+import baseConfig from "./base.js";
 
 /**
- * A custom ESLint configuration for libraries that use Next.js.
+ * ESLint configuration for Next.js applications.
+ *
+ * Applies ONLY to Next.js apps (apps/**),
+ * not the workspace root or non-Next packages.
  *
  * @type {import("eslint").Linter.Config[]}
- * */
-export const nextJsConfig = [
+ */
+export default [
+  // Base shared rules
   ...baseConfig,
-  js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
+
+  // Global ignores (important!)
   globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
+    "**/.next/**",
+    "**/out/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/node_modules/**",
     "next-env.d.ts",
   ]),
+
+  // Apply Next + React rules ONLY to apps
   {
-    ...pluginReact.configs.flat.recommended,
+    files: ["apps/**/*.{js,jsx,ts,tsx}"],
+
     languageOptions: {
-      ...pluginReact.configs.flat.recommended.languageOptions,
+      ecmaVersion: "latest",
+      sourceType: "module",
       globals: {
+        ...globals.browser,
         ...globals.serviceworker,
       },
     },
-  },
-  {
+
     plugins: {
+      react: pluginReact,
+      "react-hooks": pluginReactHooks,
       "@next/next": pluginNext,
     },
+
     rules: {
+      // Base + TS
+      ...js.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
+
+      // React
+      ...pluginReact.configs.flat.recommended.rules,
+
+      // React Hooks
+      ...pluginReactHooks.configs.recommended.rules,
+
+      // Next.js
       ...pluginNext.configs.recommended.rules,
       ...pluginNext.configs["core-web-vitals"].rules,
-    },
-  },
-  {
-    plugins: {
-      "react-hooks": pluginReactHooks,
-    },
-    settings: { react: { version: "detect" } },
-    rules: {
-      ...pluginReactHooks.configs.recommended.rules,
-      // React scope no longer necessary with new JSX transform.
+
+      // JSX transform
       "react/react-in-jsx-scope": "off",
+
+      // Pages Directory
+      "@next/next/no-html-link-for-pages": "off",
+    },
+
+    settings: {
+      react: {
+        version: "detect",
+      },
     },
   },
+
+  // Prettier LAST
+  eslintConfigPrettier,
 ];
