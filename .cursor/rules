@@ -28,7 +28,7 @@ Always enforce strict TypeScript practices:
 ### Procedure Definitions
 
 ```typescript
-// ✅ GOOD - Explicit input/output types with Zod
+// GOOD - Explicit input/output types with Zod
 export const userRouter = router({
   getById: publicProcedure
     .input(z.object({ id: z.string().uuid() }))
@@ -37,7 +37,7 @@ export const userRouter = router({
     }),
 });
 
-// ❌ BAD - Implicit types, no validation
+// BAD - Implicit types, no validation
 export const userRouter = router({
   getById: publicProcedure.query(async ({ input }) => {
     // Missing input validation and return type
@@ -55,7 +55,7 @@ export const userRouter = router({
 ### Error Handling
 
 ```typescript
-// ✅ GOOD - Use TRPCError with proper codes
+// GOOD - Use TRPCError with proper codes
 import { TRPCError } from "@trpc/server";
 
 throw new TRPCError({
@@ -64,14 +64,14 @@ throw new TRPCError({
   cause: originalError, // Preserve error chain
 });
 
-// ❌ BAD - Generic errors
+// BAD - Generic errors
 throw new Error("Something went wrong");
 ```
 
 ### Client Usage
 
 ```typescript
-// ✅ GOOD - Type-safe queries with proper error handling
+// GOOD - Type-safe queries with proper error handling
 const { data, error, isLoading } = trpc.user.getById.useQuery(
   { id: userId },
   {
@@ -80,7 +80,7 @@ const { data, error, isLoading } = trpc.user.getById.useQuery(
   }
 );
 
-// ✅ GOOD - Mutations with optimistic updates
+// GOOD - Mutations with optimistic updates
 const utils = trpc.useUtils();
 const mutation = trpc.user.update.useMutation({
   onSuccess: () => {
@@ -100,7 +100,7 @@ const mutation = trpc.user.update.useMutation({
 - **PREFER Server Components** unless client-side interactivity is needed
 
 ```typescript
-// ✅ GOOD
+// GOOD
 "use client";
 
 import { type ReactNode } from "react";
@@ -127,7 +127,7 @@ export const Button = ({ children, onClick, variant = "primary" }: ButtonProps) 
 - **FOLLOW the `use` prefix convention** for all hooks
 
 ```typescript
-// ✅ GOOD - Custom hook for tRPC query
+// GOOD - Custom hook for tRPC query
 export const useUser = (userId: string) => {
   return trpc.user.getById.useQuery(
     { id: userId },
@@ -143,7 +143,7 @@ export const useUser = (userId: string) => {
 - **ORGANIZE imports**: React → External → Internal → Types → Styles
 
 ```typescript
-// ✅ GOOD
+// GOOD
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { trpc } from "@/lib/trpc";
@@ -166,7 +166,7 @@ import type { User } from "@/types";
 - **INFER types from schemas** - Don't duplicate type definitions
 
 ```typescript
-// ✅ GOOD - Schema with inferred type
+// GOOD - Schema with inferred type
 export const userSchema = z.object({
   id: z.string().uuid().describe("Unique user identifier"),
   email: z.string().email(),
@@ -176,7 +176,7 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>;
 
-// ❌ BAD - Duplicated type definition
+// BAD - Duplicated type definition
 interface User {
   id: string;
   email: string;
@@ -187,12 +187,12 @@ interface User {
 ## Error Handling Patterns
 
 ```typescript
-// ✅ GOOD - Result type pattern for procedures
+// GOOD - Result type pattern for procedures
 type Result<T, E = Error> =
   | { success: true; data: T }
   | { success: false; error: E };
 
-// ✅ GOOD - Exhaustive error handling
+// GOOD - Exhaustive error handling
 function handleError(error: TRPCClientError<AppRouter>): string {
   switch (error.data?.code) {
     case "NOT_FOUND":
@@ -228,10 +228,10 @@ function handleError(error: TRPCClientError<AppRouter>): string {
 
 ## Do Not
 
-- ❌ Use `any` type
-- ❌ Suppress TypeScript errors without justification
-- ❌ Use untyped API responses - always validate with Zod
-- ❌ Mix client and server code without clear boundaries
-- ❌ Use string literals for tRPC error codes - use the enum
-- ❌ Forget to handle loading and error states in UI
-- ❌ Create new packages without updating `pnpm-workspace.yaml`
+- Use `any` type
+- Suppress TypeScript errors without justification
+- Use untyped API responses - always validate with Zod
+- Mix client and server code without clear boundaries
+- Use string literals for tRPC error codes - use the enum
+- Forget to handle loading and error states in UI
+- Create new packages without updating `pnpm-workspace.yaml`
