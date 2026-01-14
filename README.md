@@ -3,6 +3,10 @@
 # t3 stack
 
 <p>
+  <a href="https://www.prisma.io">
+    <img src="https://cdn.worldvectorlogo.com/logos/prisma-2.svg" alt="Prisma" height="50" />
+  </a>
+  &nbsp;&nbsp;&nbsp;
   <a href="https://www.docker.com">
     <img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Docker" height="50" />
   </a>
@@ -19,12 +23,8 @@
     <img src="https://pnpm.io/img/pnpm-no-name-with-frame.svg" alt="pnpm" height="50" />
   </a>
   &nbsp;&nbsp;&nbsp;
-  <a href="https://www.prisma.io">
-    <img src="https://cdn.worldvectorlogo.com/logos/prisma-2.svg" alt="Prisma" height="50" />
-  </a>
-  &nbsp;&nbsp;&nbsp;
   <a href="https://turbo.build">
-    <img src="https://user-images.githubusercontent.com/4060187/196936104-5797571e-271b-4756-a23b-82a5c05a952c.png" alt="Turborepo" height="50" />
+    <img src="https://raw.githubusercontent.com/github/explore/6f432b65e4c27df130e8f7a68b8f85844cbf6a4b/topics/turbo/turbo.png" alt="Turborepo" height="50" />
   </a>
 </p>
 
