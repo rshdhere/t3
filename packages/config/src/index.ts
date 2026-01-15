@@ -59,7 +59,9 @@ export const DATABASE_URL = getEnvVar("DATABASE_URL");
 export const JWT_SECRET = getEnvVar("JWT_SECRET");
 
 // Server
-export const BACKEND_PORT = getEnvVar("BACKEND_PORT", false) || "3001";
+import { BACKEND_PORT as DEFAULT_BACKEND_PORT } from "./constants.js";
+export const BACKEND_PORT =
+  getEnvVar("BACKEND_PORT", false) || String(DEFAULT_BACKEND_PORT);
 
 // Export all env vars as a single object for convenience
 export const env = {
