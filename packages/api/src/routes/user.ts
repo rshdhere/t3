@@ -1,8 +1,45 @@
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 import { router, publicProcedure, JWT_SECRET } from "../trpc.js";
 import { userOutputValidation, userInputValidation } from "@repo/validators";
 import { prismaClient } from "@repo/store";
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from "@repo/config";
+import {
+  GITHUB_TOKEN_URL,
+  GITHUB_USER_URL,
+  GITHUB_EMAILS_URL,
+} from "@repo/config/constants";
+
+// GitHub OAuth input validation
+const githubAuthInput = z.object({
+  code: z.string().min(1, "Authorization code is required"),
+  state: z.string().optional(),
+});
+
+// Types for GitHub API responses
+interface GitHubTokenResponse {
+  access_token: string;
+  token_type: string;
+  scope: string;
+  error?: string;
+  error_description?: string;
+}
+
+interface GitHubUser {
+  id: number;
+  login: string;
+  name: string | null;
+  email: string | null;
+  avatar_url: string;
+}
+
+interface GitHubEmail {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+  visibility: string | null;
+}
 
 export const userRouter = router({
   signup: publicProcedure
@@ -69,6 +106,171 @@ export const userRouter = router({
         });
       }
 
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
+      return { token };
+    }),
+
+  githubAuth: publicProcedure
+    .input(githubAuthInput)
+    .output(userOutputValidation)
+    .mutation(async ({ input }) => {
+      const { code } = input;
+
+      // Step 1: Exchange code for access token
+      const tokenResponse = await fetch(GITHUB_TOKEN_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          client_id: GITHUB_CLIENT_ID,
+          client_secret: GITHUB_CLIENT_SECRET,
+          code,
+        }),
+      });
+
+      const tokenData: GitHubTokenResponse = await tokenResponse.json();
+
+      if (tokenData.error || !tokenData.access_token) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            tokenData.error_description || "Failed to exchange code for token",
+        });
+      }
+
+      const accessToken = tokenData.access_token;
+
+      // Step 2: Fetch user profile
+      const userResponse = await fetch(GITHUB_USER_URL, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch GitHub user profile",
+        });
+      }
+
+      const githubUser: GitHubUser = await userResponse.json();
+
+      // Step 3: Fetch user emails (since email might be private)
+      const emailsResponse = await fetch(GITHUB_EMAILS_URL, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      });
+
+      let primaryEmail: string | null = githubUser.email;
+
+      if (emailsResponse.ok) {
+        const emails: GitHubEmail[] = await emailsResponse.json();
+        const primary = emails.find((e) => e.primary && e.verified);
+        if (primary) {
+          primaryEmail = primary.email;
+        } else {
+          // Fallback to first verified email
+          const verified = emails.find((e) => e.verified);
+          if (verified) {
+            primaryEmail = verified.email;
+          }
+        }
+      }
+
+      // Step 4: Find or create user and account
+      const githubId = githubUser.id.toString();
+
+      // Check if account already exists
+      const existingAccount = await prismaClient.account.findUnique({
+        where: {
+          provider_providerAccountId: {
+            provider: "github",
+            providerAccountId: githubId,
+          },
+        },
+        include: { user: true },
+      });
+
+      let user;
+
+      if (existingAccount) {
+        // Update user info and return existing user
+        user = await prismaClient.user.update({
+          where: { id: existingAccount.userId },
+          data: {
+            name: githubUser.name || githubUser.login,
+            avatarUrl: githubUser.avatar_url,
+            // Update email only if user doesn't have one
+            ...(primaryEmail && !existingAccount.user.email
+              ? { email: primaryEmail }
+              : {}),
+          },
+        });
+
+        // Update account tokens
+        await prismaClient.account.update({
+          where: { id: existingAccount.id },
+          data: {
+            accessToken: accessToken,
+          },
+        });
+      } else {
+        // Check if user with this email already exists
+        const existingUser = primaryEmail
+          ? await prismaClient.user.findUnique({
+              where: { email: primaryEmail },
+            })
+          : null;
+
+        if (existingUser) {
+          // Link GitHub account to existing user
+          await prismaClient.account.create({
+            data: {
+              userId: existingUser.id,
+              provider: "github",
+              providerAccountId: githubId,
+              accessToken: accessToken,
+            },
+          });
+
+          // Update user profile
+          user = await prismaClient.user.update({
+            where: { id: existingUser.id },
+            data: {
+              name: existingUser.name || githubUser.name || githubUser.login,
+              avatarUrl: existingUser.avatarUrl || githubUser.avatar_url,
+            },
+          });
+        } else {
+          // Create new user with GitHub account
+          user = await prismaClient.user.create({
+            data: {
+              email: primaryEmail || `github_${githubId}@placeholder.local`,
+              name: githubUser.name || githubUser.login,
+              avatarUrl: githubUser.avatar_url,
+              emailVerified: !!primaryEmail, // Verified if we got email from GitHub
+              accounts: {
+                create: {
+                  provider: "github",
+                  providerAccountId: githubId,
+                  accessToken: accessToken,
+                },
+              },
+            },
+          });
+        }
+      }
+
+      // Step 5: Create JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
         expiresIn: "1h",
       });

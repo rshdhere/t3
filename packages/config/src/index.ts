@@ -58,6 +58,10 @@ export const DATABASE_URL = getEnvVar("DATABASE_URL");
 // Auth
 export const JWT_SECRET = getEnvVar("JWT_SECRET");
 
+// GitHub OAuth
+export const GITHUB_CLIENT_ID = getEnvVar("CLIENT_ID_GITHUB");
+export const GITHUB_CLIENT_SECRET = getEnvVar("CLIENT_SECRET_GITHUB");
+
 // Server
 import { BACKEND_PORT as DEFAULT_BACKEND_PORT } from "./constants.js";
 export const BACKEND_PORT =
@@ -67,5 +71,7 @@ export const BACKEND_PORT =
 export const env = {
   DATABASE_URL,
   JWT_SECRET,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
   BACKEND_PORT,
 } as const;
