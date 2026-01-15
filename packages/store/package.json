@@ -12,6 +12,7 @@
     "prisma:validate": "bunx prisma validate"
   },
   "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
     "@types/bun": "latest",
     "@types/ws": "^8.18.1",
     "prisma": "^7.2.0"

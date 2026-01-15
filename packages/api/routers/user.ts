@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
-import { router, publicProcedure, JWT_SECRET } from "../trpc";
+import { router, publicProcedure, JWT_SECRET } from "../trpc.js";
 import {
   userSignupOutputValidation,
   userSignupValidation,

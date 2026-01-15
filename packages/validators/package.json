@@ -8,6 +8,7 @@
     "./user": "./src/user/index.ts"
   },
   "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
     "@types/bun": "latest"
   },
   "peerDependencies": {

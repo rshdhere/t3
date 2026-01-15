@@ -8,6 +8,7 @@
     "./trpc": "./trpc.ts"
   },
   "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
     "@types/bun": "latest",
     "@types/jsonwebtoken": "^9.0.10"
   },

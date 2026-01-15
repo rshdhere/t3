@@ -4,11 +4,11 @@ export {
   publicProcedure,
   protectedProcedure,
   createContext,
-} from "./trpc";
-export type { Context } from "./trpc";
+} from "./trpc.js";
+export type { Context } from "./trpc.js";
 
 // Export routers
-export { userRouter } from "./routers/user";
+export { userRouter } from "./routers/user.js";
 
 // Export type utilities
 export type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
