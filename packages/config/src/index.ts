@@ -62,6 +62,9 @@ export const JWT_SECRET = getEnvVar("JWT_SECRET");
 export const GITHUB_CLIENT_ID = getEnvVar("CLIENT_ID_GITHUB");
 export const GITHUB_CLIENT_SECRET = getEnvVar("CLIENT_SECRET_GITHUB");
 
+// Resend (Email)
+export const RESEND_API_KEY = getEnvVar("RESEND_API_KEY");
+
 // Server
 import { BACKEND_PORT as DEFAULT_BACKEND_PORT } from "./constants.js";
 export const BACKEND_PORT =
@@ -74,4 +77,5 @@ export const env = {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
   BACKEND_PORT,
+  RESEND_API_KEY,
 } as const;

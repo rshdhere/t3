@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { GITHUB_OAUTH_URL } from "@repo/config/constants";
@@ -34,20 +33,34 @@ function handleGitHubLogin() {
 }
 
 export default function SignupPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [sentToEmail, setSentToEmail] = useState("");
 
   const signup = trpc.user.signup.useMutation({
     onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
-      toast.success("Account created", {
-        description: "Welcome! Your account has been created successfully.",
+      setSentToEmail(data.email);
+      setVerificationSent(true);
+      toast.success("Check your email", {
+        description: data.message,
       });
-      router.push("/");
     },
     onError: (err) => {
       toast.error("Sign up failed", {
+        description: getErrorMessage(err),
+      });
+    },
+  });
+
+  const resendVerification = trpc.user.resendVerification.useMutation({
+    onSuccess: () => {
+      toast.success("Verification email sent", {
+        description: "Please check your inbox",
+      });
+    },
+    onError: (err) => {
+      toast.error("Failed to resend", {
         description: getErrorMessage(err),
       });
     },
@@ -57,6 +70,85 @@ export default function SignupPage() {
     e.preventDefault();
     signup.mutate({ email, password });
   };
+
+  const handleResend = () => {
+    resendVerification.mutate({ email: sentToEmail });
+  };
+
+  const resendToastShown = useRef(false);
+
+  useEffect(() => {
+    if (verificationSent && !resendToastShown.current) {
+      resendToastShown.current = true;
+      const timer = setTimeout(() => {
+        toast("Didn't receive the email?", {
+          description: "Check your spam folder or click here",
+          duration: Infinity,
+          action: {
+            label: "Resend",
+            onClick: handleResend,
+          },
+        });
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verificationSent, sentToEmail]);
+
+  // Show verification sent screen
+  if (verificationSent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-sm space-y-6 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center">
+            <svg
+              className="h-10 w-10 animate-spin text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">Check your email</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              We&apos;ve sent a verification link to{" "}
+              <span className="font-medium text-gray-900 dark:text-white">
+                {sentToEmail}
+              </span>
+            </p>
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Click the link in the email to verify your account. The link will
+            expire in 24 hours.
+          </p>
+
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+            <Link
+              href="/login"
+              className="font-medium text-black hover:underline dark:text-white"
+            >
+              Back to login
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

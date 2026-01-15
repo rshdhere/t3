@@ -34,3 +34,14 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([email])
+}

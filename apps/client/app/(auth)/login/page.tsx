@@ -38,6 +38,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showResendOption, setShowResendOption] = useState(false);
 
   // Handle OAuth error from redirect
   useEffect(() => {
@@ -62,7 +63,25 @@ export default function LoginPage() {
       router.push("/");
     },
     onError: (err) => {
+      const message = getErrorMessage(err);
+      // Check if error is about unverified email
+      if (message.toLowerCase().includes("verify your email")) {
+        setShowResendOption(true);
+      }
       toast.error("Login failed", {
+        description: message,
+      });
+    },
+  });
+
+  const resendVerification = trpc.user.resendVerification.useMutation({
+    onSuccess: () => {
+      toast.success("Verification email sent", {
+        description: "Please check your inbox",
+      });
+    },
+    onError: (err) => {
+      toast.error("Failed to resend", {
         description: getErrorMessage(err),
       });
     },
@@ -70,7 +89,14 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowResendOption(false);
     login.mutate({ email, password });
+  };
+
+  const handleResend = () => {
+    if (email) {
+      resendVerification.mutate({ email });
+    }
   };
 
   return (
@@ -154,6 +180,24 @@ export default function LoginPage() {
             {login.isPending ? "Logging in..." : "Log in"}
           </button>
         </form>
+
+        {showResendOption && email && (
+          <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              Your email is not verified yet.{" "}
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendVerification.isPending}
+                className="font-medium underline hover:no-underline disabled:opacity-50"
+              >
+                {resendVerification.isPending
+                  ? "Sending..."
+                  : "Resend verification email"}
+              </button>
+            </p>
+          </div>
+        )}
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400">
           Don&apos;t have an account?{" "}

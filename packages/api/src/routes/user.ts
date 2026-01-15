@@ -2,7 +2,12 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { router, publicProcedure, JWT_SECRET } from "../trpc.js";
-import { userOutputValidation, userInputValidation } from "@repo/validators";
+import {
+  userOutputValidation,
+  userInputValidation,
+  githubAuthInput,
+  signupOutputValidation,
+} from "@repo/validators";
 import { prismaClient } from "@repo/store";
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from "@repo/config";
 import {
@@ -10,12 +15,7 @@ import {
   GITHUB_USER_URL,
   GITHUB_EMAILS_URL,
 } from "@repo/config/constants";
-
-// GitHub OAuth input validation
-const githubAuthInput = z.object({
-  code: z.string().min(1, "Authorization code is required"),
-  state: z.string().optional(),
-});
+import { sendVerificationEmail } from "../email.js";
 
 // Types for GitHub API responses
 interface GitHubTokenResponse {
@@ -41,9 +41,14 @@ interface GitHubEmail {
   visibility: string | null;
 }
 
+// Helper to generate verification token
+function generateVerificationToken(): string {
+  return crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "");
+}
+
 export const userRouter = router({
   signup: publicProcedure
-    .output(userOutputValidation)
+    .output(signupOutputValidation)
     .input(userInputValidation)
     .mutation(async (opts) => {
       const email = opts.input.email;
@@ -62,18 +67,160 @@ export const userRouter = router({
 
       const hash = await Bun.password.hash(password);
 
-      const user = await prismaClient.user.create({
+      // Create user with emailVerified: false (default)
+      await prismaClient.user.create({
         data: {
           email: email,
           passwordHash: hash,
         },
       });
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      // Generate verification token (expires in 24 hours)
+      const verificationToken = generateVerificationToken();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      // Delete any existing tokens for this email
+      await prismaClient.emailVerificationToken.deleteMany({
+        where: { email },
+      });
+
+      // Create new verification token
+      await prismaClient.emailVerificationToken.create({
+        data: {
+          token: verificationToken,
+          email,
+          expiresAt,
+        },
+      });
+
+      // Send verification email
+      const emailResult = await sendVerificationEmail(email, verificationToken);
+
+      if (!emailResult.success) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send verification email. Please try again.",
+        });
+      }
+
+      return {
+        message: "Please check your email to verify your account",
+        email,
+      };
+    }),
+
+  verifyEmail: publicProcedure
+    .input(z.object({ token: z.string().min(1, "Token is required") }))
+    .output(userOutputValidation)
+    .mutation(async ({ input }) => {
+      const { token } = input;
+
+      // Find the verification token
+      const verificationToken =
+        await prismaClient.emailVerificationToken.findUnique({
+          where: { token },
+        });
+
+      if (!verificationToken) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid or expired verification link",
+        });
+      }
+
+      // Check if token is expired
+      if (verificationToken.expiresAt < new Date()) {
+        // Delete expired token
+        await prismaClient.emailVerificationToken.delete({
+          where: { id: verificationToken.id },
+        });
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Verification link has expired. Please sign up again.",
+        });
+      }
+
+      // Find and update the user
+      const user = await prismaClient.user.findUnique({
+        where: { email: verificationToken.email },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      // Mark email as verified
+      await prismaClient.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true },
+      });
+
+      // Delete the verification token
+      await prismaClient.emailVerificationToken.delete({
+        where: { id: verificationToken.id },
+      });
+
+      // Generate JWT token
+      const jwtToken = jwt.sign({ userId: user.id }, JWT_SECRET, {
         expiresIn: "1h",
       });
 
-      return { token };
+      return { token: jwtToken };
+    }),
+
+  resendVerification: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      const { email } = input;
+
+      // Check if user exists and is not verified
+      const user = await prismaClient.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        // Don't reveal if user exists or not for security
+        return {
+          message: "If an account exists, a verification email has been sent",
+        };
+      }
+
+      if (user.emailVerified) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email is already verified",
+        });
+      }
+
+      // Generate new verification token
+      const verificationToken = generateVerificationToken();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      // Delete any existing tokens for this email
+      await prismaClient.emailVerificationToken.deleteMany({
+        where: { email },
+      });
+
+      // Create new verification token
+      await prismaClient.emailVerificationToken.create({
+        data: {
+          token: verificationToken,
+          email,
+          expiresAt,
+        },
+      });
+
+      // Send verification email
+      await sendVerificationEmail(email, verificationToken);
+
+      return {
+        message: "If an account exists, a verification email has been sent",
+      };
     }),
 
   login: publicProcedure
@@ -91,6 +238,14 @@ export const userRouter = router({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "user not found",
+        });
+      }
+
+      // Check if email is verified
+      if (!user.emailVerified) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Please verify your email before logging in",
         });
       }
 

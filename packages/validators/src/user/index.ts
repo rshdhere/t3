@@ -25,3 +25,15 @@ export const userInputValidation = z
 export const userOutputValidation = z.object({
   token: z.string(),
 });
+
+// GitHub OAuth input validation
+export const githubAuthInput = z.object({
+  code: z.string().min(1, "Authorization code is required"),
+  state: z.string().optional(),
+});
+
+// Signup output validation (returns message instead of token)
+export const signupOutputValidation = z.object({
+  message: z.string(),
+  email: z.string().email(),
+});
