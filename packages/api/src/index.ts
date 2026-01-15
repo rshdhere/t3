@@ -8,7 +8,7 @@ export {
 export type { Context } from "./trpc.js";
 
 // Export routers
-export { userRouter } from "./routers/user.js";
+export { userRouter } from "./routes/user.js";
 
 // Export type utilities
 export type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
