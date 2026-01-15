@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const userSignupValidation = z
+export const userInputValidation = z
   .object({
     email: z
       .string()
@@ -22,6 +22,6 @@ export const userSignupValidation = z
   })
   .strict();
 
-export const userSignupOutputValidation = z.object({
+export const userOutputValidation = z.object({
   token: z.string(),
 });
