@@ -3,9 +3,7 @@
 # t3 stack
 
 <p>
-  <a href="https://www.prisma.io">
-    <img src="https://cdn.worldvectorlogo.com/logos/prisma-2.svg" alt="Prisma" height="50" />
-  </a>
+  <img src="https://www.prisma.io/favicon.ico" alt="Prisma" width="32" />
   &nbsp;&nbsp;&nbsp;
   <a href="https://www.docker.com">
     <img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Docker" height="50" />
