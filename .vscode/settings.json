@@ -33,7 +33,9 @@
      * Language-specific formatters
      */
     "[prisma]": {
-      "editor.defaultFormatter": "Prisma.prisma"
+      "editor.defaultFormatter": "Prisma.prisma",
+      "editor.formatOnSave": true,
+      "editor.tabSize": 2
     },
   
     /**
