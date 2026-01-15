@@ -1,5 +1,7 @@
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "./generated/prisma/index";
+import { DATABASE_URL } from "@repo/config";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaNeon({ connectionString: DATABASE_URL });
 
-await prisma.user.findMany();
+export const prismaClient = new PrismaClient({ adapter });

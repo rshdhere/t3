@@ -1,0 +1,25 @@
+{
+  "name": "@repo/api",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.ts",
+    "./trpc": "./trpc.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/jsonwebtoken": "^9.0.10"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*",
+    "@repo/store": "workspace:*",
+    "@repo/validators": "workspace:*",
+    "@trpc/client": "^11.8.1",
+    "@trpc/server": "^11.8.1",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
