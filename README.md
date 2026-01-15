@@ -10,9 +10,13 @@
 
 </div>
 
-## Environment Variables
+<div align="center">
 
-create a `.env` file in the /config and add the following:
+## TURBOREPO + BUN + ZOD + TRPC + PRISMA
+
+</div>
+
+Create a `.env` file in the `/config` package and add the following:
 
 ```env
 BACKEND_PORT="your-backend-port"
