@@ -28,7 +28,7 @@ export async function sendVerificationEmail(
                 Verify your email
               </h1>
               <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.5; color: #4b5563;">
-                Thanks for signing up! Please click the button below to verify your email address.
+                Thanks for signing up at <b>rshdhere technologies</b>! Please click the button below to verify your email address.
               </p>
               <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #111827; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 14px;">
                 Verify Email

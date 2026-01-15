@@ -4,8 +4,14 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
-    "./trpc": "./src/trpc.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./trpc": {
+      "types": "./src/trpc.ts",
+      "import": "./src/trpc.ts"
+    }
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
