@@ -22,7 +22,7 @@
   </a>
   &nbsp;&nbsp;&nbsp;
   <a href="https://turbo.build">
-    <img src="https://raw.githubusercontent.com/github/explore/6f432b65e4c27df130e8f7a68b8f85844cbf6a4b/topics/turbo/turbo.png" alt="Turborepo" height="50" />
+    <img src="./apps/client/public/turborepo.webp" alt="Turborepo" height="50" />
   </a>
 </p>
 
