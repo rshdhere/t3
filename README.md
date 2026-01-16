@@ -16,12 +16,31 @@
 
 </div>
 
-Create a `.env` file in the `/config` package and add the following:
+## 1. Install Dependencies
 
-```env
-BACKEND_PORT="your-backend-port"
-JWT_SECRET="your-jwt-secret"
-DATABASE_URL="your-database-connection-string"
-RESEND_API_KEY="your-resend-api-key"
-CLIENT_ID_GITHUB="your-github-client-id"
-CLIENT_SECRET_GITHUB="your-github-client-secret"
+From the root of the monorepo, install all workspace dependencies :
+
+```bash
+pnpm install
+```
+
+## 2. Generate Prisma-Client
+
+move to the `/store` package and generate a prisma-client :
+
+```bash
+bun run prisma:generate
+```
+
+## 3. Environment variables
+
+move to the `/config` package and add your .env :
+
+```bash
+BACKEND_PORT=3001
+JWT_SECRET=your-jwt-secret
+DATABASE_URL=your-database-connection-string
+RESEND_API_KEY=your-resend-api-key
+CLIENT_ID_GITHUB=your-github-client-id
+CLIENT_SECRET_GITHUB=your-github-client-secret
+```
