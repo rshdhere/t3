@@ -93,15 +93,15 @@ export const userRouter = router({
         },
       });
 
-      // Send verification email
-      const emailResult = await sendVerificationEmail(email, verificationToken);
-
-      if (!emailResult.success) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to send verification email. Please try again.",
+      // Send verification email (fire-and-forget for faster response)
+      sendVerificationEmail(email, verificationToken)
+        .then(() => {
+          console.log("Verification email sent successfully:", email);
+        })
+        .catch((err) => {
+          console.error("Failed to send verification email:", err);
+          // TODO: Add to retry queue
         });
-      }
 
       return {
         message: "Please check your email to verify your account",
