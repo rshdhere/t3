@@ -16,9 +16,8 @@
 
 
 
-<a href="https://trpc.io/docs" target="_blank" rel="noopener noreferrer">
-  <img src="https://github.com/user-attachments/assets/9565f06a-eb4f-48fc-9020-a7a8f0b3d6bd" alt="tRPC" />
-</a>
+[![tRPC](https://github.com/user-attachments/assets/9565f06a-eb4f-48fc-9020-a7a8f0b3d6bd)](https://trpc.io/docs)
+
 
 
 
@@ -44,7 +43,7 @@ bun run prisma:generate
 
 ## 3. Environment variables
 
-move to the `/config` package and add your .env :
+move to the `/config` package and add your `.env` :
 
 ```bash
 BACKEND_PORT=3001
