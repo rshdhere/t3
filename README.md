@@ -35,7 +35,7 @@ pnpm install
 
 ## 2. Generate Prisma-Client
 
-move to the `/store` package and generate a prisma-client :
+move to the `/store` package and generate the prisma-client :
 
 ```bash
 bun run prisma:generate
