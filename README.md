@@ -55,7 +55,7 @@ CLIENT_SECRET_GITHUB=your-github-client-secret
 ```
 ## 4. Change address for email service
 
-move to the `/api` package, Inside `src/email.ts` change the "from-address" and update the "bold-tag" to your labs page and your service name accordingly
+move to the `/api` package, Inside `src/email.ts` change the "from-address" and update the "bold-tag" to your address/domain and you labs page or your service name accordingly
 
 ```bash
 from: "your-resend-email/domain"
