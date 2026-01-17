@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { GITHUB_OAUTH_URL } from "@repo/config/constants";
-import { PasswordInput, isPasswordValid } from "@/components/ui/password-input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 function getErrorMessage(error: { message: string }): string {
   try {
@@ -167,13 +167,12 @@ export default function LoginPage() {
               value={password}
               onChange={setPassword}
               required
-              showStrength
             />
           </div>
 
           <button
             type="submit"
-            disabled={login.isPending || !isPasswordValid(password)}
+            disabled={login.isPending}
             className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
           >
             {login.isPending ? "Logging in..." : "Log in"}
