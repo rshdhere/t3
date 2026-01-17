@@ -257,7 +257,7 @@ export const userRouter = router({
       if (!passwordMatched) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "invalid credentials",
+          message: "Invalid Credentials",
         });
       }
 

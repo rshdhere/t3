@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { GITHUB_OAUTH_URL } from "@repo/config/constants";
+import { PasswordInput, isPasswordValid } from "@/components/ui/password-input";
 
 function getErrorMessage(error: { message: string }): string {
   try {
@@ -161,21 +162,19 @@ export default function LoginPage() {
             <label htmlFor="password" className="text-sm font-medium">
               Password
             </label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
-              placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
               required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:focus:ring-gray-100"
+              showStrength
             />
           </div>
 
           <button
             type="submit"
-            disabled={login.isPending}
-            className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+            disabled={login.isPending || !isPasswordValid(password)}
+            className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
           >
             {login.isPending ? "Logging in..." : "Log in"}
           </button>
