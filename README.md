@@ -53,3 +53,13 @@ RESEND_API_KEY=your-resend-api-key
 CLIENT_ID_GITHUB=your-github-client-id
 CLIENT_SECRET_GITHUB=your-github-client-secret
 ```
+## 4. Change address for email service
+
+move to the `/api` package, Inside `src/email.ts` change the "from-address" and update the "bold-tag" to your labs page
+
+```bash
+from: "your-resend-email/domain"
+<b>your-name/your-email-service</b>!
+
+```
+
