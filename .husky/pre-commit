@@ -1,8 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-# Run tests before committing
 bun test
-
-# Run lint-staged
 bun run lint-staged
