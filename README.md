@@ -56,7 +56,7 @@ CLIENT_SECRET_GITHUB=your-github-client-secret
 
 ## 4. Manual Port's
 
-move to the `/config` package and in `constant.ts` configure your client and server port's accordingly
+move to the `/config` package and in `constants.ts` configure your client and server port's accordingly
 
 ## 5. Change address for email service
 
