@@ -53,7 +53,12 @@ RESEND_API_KEY=your-resend-api-key
 CLIENT_ID_GITHUB=your-github-client-id
 CLIENT_SECRET_GITHUB=your-github-client-secret
 ```
-## 4. Change address for email service
+
+## 4. Manual Port's
+
+move to the `/config` package and in `constant.ts` configure your client and server port's accordingly
+
+## 5. Change address for email service
 
 move to the `/api` package, Inside `src/email.ts` change the "from-address" and update the "bold-tag" to your address/domain from **resend** and your labs page or your service name accordingly
 
