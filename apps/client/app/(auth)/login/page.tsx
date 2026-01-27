@@ -55,6 +55,17 @@ export default function LoginPage() {
     }
   }, [searchParams]);
 
+  // Handle session expiration
+  useEffect(() => {
+    const sessionExpired = sessionStorage.getItem("session_expired");
+    if (sessionExpired === "true") {
+      toast.info("Session expired", {
+        description: "Your session has expired. Please log in again.",
+      });
+      sessionStorage.removeItem("session_expired");
+    }
+  }, []);
+
   const login = trpc.user.login.useMutation({
     onSuccess: (data) => {
       localStorage.setItem("token", data.token);

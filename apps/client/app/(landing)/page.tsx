@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { logout } from "@/lib/auth";
 
 export default function Home() {
   const router = useRouter();
@@ -14,9 +15,7 @@ export default function Home() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    router.refresh();
+    logout("/login", false); // Manual logout, no toast needed
   };
 
   return (
