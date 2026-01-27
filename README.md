@@ -30,7 +30,7 @@
 From the root of the monorepo, install all workspace dependencies :
 
 ```bash
-pnpm install
+bun install
 ```
 
 ## 2. Generate Prisma-Client

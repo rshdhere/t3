@@ -3,5 +3,5 @@ node_modules
 dist
 .git
 .turbo
-pnpm-lock.yaml
+bun.lockb
 .env*

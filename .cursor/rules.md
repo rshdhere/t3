@@ -3,7 +3,7 @@
 ## Project Structure
 
 This is a **Turborepo monorepo** using:
-- **pnpm** as package manager
+- **bun** as package manager
 - **TypeScript** with strict mode enabled
 - **Next.js** for client applications
 - **tRPC** for end-to-end type-safe APIs
@@ -234,4 +234,4 @@ function handleError(error: TRPCClientError<AppRouter>): string {
 - Mix client and server code without clear boundaries
 - Use string literals for tRPC error codes - use the enum
 - Forget to handle loading and error states in UI
-- Create new packages without updating `pnpm-workspace.yaml`
+- Create new packages without updating workspace configuration (bun automatically detects workspaces)

@@ -41,7 +41,7 @@
     /**
      * Workspace consistency
      */
-    "npm.packageManager": "pnpm",
+    "npm.packageManager": "bun",
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true
   }
